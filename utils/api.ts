@@ -31,7 +31,7 @@ export const fetchRealtyListings = async (options: fetchRealtyOptions = {}) => {
         };
 
         const response = await axios.request(options);
-        return response;
+        return response.data.Result.Offers;
     } catch (error) {
         console.error('Error fetching realty listings:', error);
         return null;
@@ -49,9 +49,9 @@ export const fetchRealtyListingsById = async (id: string) => {
             },
         };
         const response = await axios.request(options)
-        return response
+        return response.data.Result
     } catch (error) {
-       console.error('Error fetching realty details:', error);
-    return null;
+        console.error('Error fetching realty details:', error);
+        return null;
     }
 };
