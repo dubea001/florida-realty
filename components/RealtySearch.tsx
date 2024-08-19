@@ -4,12 +4,14 @@ import { cities, sortOptions } from '@/lists';
 import { fetchRealtyListings, fetchRealtyListingsById } from '@/utils/api';
 import React, { useEffect, useState } from 'react';
 import Button from './Button';
+import { listingProps } from '@/types';
+import DisplayHouses from './DisplayHouses';
 
-const RealtySearch = () => {
+const RealtySearch: React.FC = () => {
     const [city, setCity] = useState<string | undefined>();
     const [sort, setSort] = useState<string>('RELEVANCE');
     const [priceMax, setPriceMax] = useState<string | undefined>();
-    const [listing, setListing] = useState<any[]>([]);
+    const [listing, setListing] = useState<listingProps[]>([]);
 
     useEffect(() => {
         const loadListing = async () => {
@@ -17,8 +19,8 @@ const RealtySearch = () => {
                 const response = await fetchRealtyListings({
                     city: 'Cape Coral',
                 });
-                console.log(response);
-                setListing(response);
+                console.log(response.slice(0, 10));
+                setListing(response.slice(0, 10));
             } catch (error) {
                 console.error('failed to fetch data', error);
             }
@@ -35,9 +37,19 @@ const RealtySearch = () => {
             sort,
             limit: '50',
         });
-        console.log(result);
+        // console.log(result);
         setListing(result);
     };
+
+    const seenIdentifiers = new Set<string>();
+
+    const filteredListing = listing.filter((item) => {
+        if (item.Identifier && !seenIdentifiers.has(item.Identifier)) {
+            seenIdentifiers.add(item.Identifier);
+            return true;
+        }
+        return false;
+    });
 
     return (
         <section className='mt-12'>
@@ -95,6 +107,11 @@ const RealtySearch = () => {
                     type='submit'
                 />
             </form>
+            <div className=''>
+                {filteredListing.map((item) => (
+                    <DisplayHouses key={item.Identifier} item={item} />
+                ))}
+            </div>
         </section>
     );
 };
