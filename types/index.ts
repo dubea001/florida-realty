@@ -57,3 +57,9 @@ interface photo {
 }
 
 
+export interface detailsPageProps {
+    params: {
+        identifier: string;
+    };  
+}
+

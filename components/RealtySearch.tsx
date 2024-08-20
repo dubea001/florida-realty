@@ -1,6 +1,6 @@
 'use client';
 
-import { cities, sortOptions } from '@/lists';
+import { cities, shuffleArray, sortOptions } from '@/lists';
 import { fetchRealtyListings, fetchRealtyListingsById } from '@/utils/api';
 import React, { useEffect, useState } from 'react';
 import Button from './Button';
@@ -16,16 +16,21 @@ const RealtySearch: React.FC = () => {
     useEffect(() => {
         const loadListing = async () => {
             try {
-                const response = await fetchRealtyListings({
-                    city: 'Cape Coral',
-                });
-                console.log(response.slice(0, 10));
-                setListing(response.slice(0, 10));
+                const allListings = new Array();
+                for (const city of cities) {
+                    const response = await fetchRealtyListings({ city });
+                    if (response) {
+                        allListings.push(...response);
+                    }
+                    const shuffledListings = shuffleArray(allListings);
+                    setListing(shuffledListings.slice(0, 10));
+                    // console.log(response.slice(0, 10));
+                }
             } catch (error) {
                 console.error('failed to fetch data', error);
             }
         };
-        loadListing();
+        // loadListing();
     }, []);
 
     const handleSearch = async (ev: React.FormEvent) => {
@@ -38,7 +43,7 @@ const RealtySearch: React.FC = () => {
             limit: '50',
         });
         // console.log(result);
-        setListing(result);
+        setListing(result.slice(0, 10));
     };
 
     const seenIdentifiers = new Set<string>();
@@ -107,7 +112,7 @@ const RealtySearch: React.FC = () => {
                     type='submit'
                 />
             </form>
-            <div className=''>
+            <div className='border-2 border-black my-12 mx-4 md:mx-12'>
                 {filteredListing.map((item) => (
                     <DisplayHouses key={item.Identifier} item={item} />
                 ))}
