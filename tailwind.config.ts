@@ -7,16 +7,16 @@ const config: Config = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    colors: {
-      primary: '#606c38',
-      secondary: '#283618',
-      content: '#ccd5ae',
-      background: '#faedcd',
-      foreground: '#d4a373',
-      black: '#000000',
-      white: '#ffffff',
-    },
     extend: {
+      colors: {
+        primary: '#606c38',
+        secondary: '#283618',
+        content: '#ccd5ae',
+        background: '#faedcd',
+        foreground: '#d4a373',
+        black: '#000000',
+        white: '#ffffff',
+      },
 
     },
   },

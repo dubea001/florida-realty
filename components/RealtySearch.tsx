@@ -1,7 +1,7 @@
 'use client';
 
 import { cities, shuffleArray, sortOptions } from '@/lists';
-import { fetchRealtyListings, fetchRealtyListingsById } from '@/utils/api';
+import { fetchRealtyListings } from '@/utils/api';
 import React, { useEffect, useState } from 'react';
 import Button from './Button';
 import { listingProps } from '@/types';
@@ -12,25 +12,26 @@ const RealtySearch: React.FC = () => {
     const [sort, setSort] = useState<string>('RELEVANCE');
     const [priceMax, setPriceMax] = useState<string | undefined>();
     const [listing, setListing] = useState<listingProps[]>([]);
+    // const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
         const loadListing = async () => {
             try {
-                const allListings = new Array();
+                const allListings: listingProps[] = new Array();
                 for (const city of cities) {
                     const response = await fetchRealtyListings({ city });
                     if (response) {
                         allListings.push(...response);
                     }
-                    const shuffledListings = shuffleArray(allListings);
-                    setListing(shuffledListings.slice(0, 10));
-                    // console.log(response.slice(0, 10));
                 }
+                const shuffledListings = shuffleArray(allListings);
+                setListing(shuffledListings.slice(0, 10));
+                console.log(shuffledListings.slice(0, 10));
             } catch (error) {
                 console.error('failed to fetch data', error);
             }
         };
-        // loadListing();
+        loadListing();
     }, []);
 
     const handleSearch = async (ev: React.FormEvent) => {
@@ -55,6 +56,10 @@ const RealtySearch: React.FC = () => {
         }
         return false;
     });
+
+    // if (isLoading) {
+    //     return <div className='text-2xl font-bold'>Loading Listing...</div>;
+    // }
 
     return (
         <section className='mt-12'>
@@ -112,7 +117,7 @@ const RealtySearch: React.FC = () => {
                     type='submit'
                 />
             </form>
-            <div className='border-2 border-black my-12 mx-4 md:mx-12'>
+            <div className='my-12 grid md:grid-cols-2 lg:grid-cols-3 gap-4 gap-y-8 md:gap-y-4 mx-8'>
                 {filteredListing.map((item) => (
                     <DisplayHouses key={item.Identifier} item={item} />
                 ))}

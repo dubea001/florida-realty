@@ -4,6 +4,7 @@ import { fetchRealtyListingsById } from '@/utils/api';
 import { useEffect, useState } from 'react';
 
 const houseDetailsPage = ({ params }: detailsPageProps) => {
+    // adjust state for type safety with interface
     const [houseDetails, setHouseDetails] = useState<any | null>(null);
 
     useEffect(() => {
@@ -18,13 +19,14 @@ const houseDetailsPage = ({ params }: detailsPageProps) => {
                 console.error('failed to fetch details', error);
             }
         };
-        fetchDetails();
-    }, []);
+        if (params.identifier) {
+            fetchDetails();
+        }
+    }, [params.identifier]);
 
     return (
         <div>
             <h1 className=''>House Details</h1>
-            <p className=''>Identifier: {params.identifier}</p>
         </div>
     );
 };

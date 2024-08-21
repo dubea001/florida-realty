@@ -1,3 +1,5 @@
+import { AvailabilityStatusProps } from "@/types";
+
 export const cities = [
     'Cape Coral',
     'Fort Myers',
@@ -29,3 +31,14 @@ export const shuffleArray = <T>(array: T[]): T[] => {
     }
     return array;
 };
+
+export const getAvailabiltyColor = (status: AvailabilityStatusProps): {color: string, text: string} => {
+    switch (status) {
+        case "InStock": 
+            return {color: 'bg-green-700', text: 'For Sale'}
+        case "LimitedAvailability":
+            return {color: 'bg-yellow-700', text: 'Limited'}         
+        default:
+            return {color: 'bg-gray-700', text: 'Not available'}
+    }
+}

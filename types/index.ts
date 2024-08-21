@@ -63,3 +63,10 @@ export interface detailsPageProps {
     };  
 }
 
+export interface formatNumberProps {
+    currency?: string;
+    minimumFractionDigits?: number;
+    maximumFractionDigits?: number;
+}
+
+export type AvailabilityStatusProps = 'InStock' | 'LimitedAvailability' | string | undefined;

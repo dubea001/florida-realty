@@ -2,11 +2,16 @@ import { DisplayHouseProps } from '@/types';
 import Image from 'next/image';
 import React from 'react';
 import Link from 'next/link';
+import { formatNumber } from '@/utils/formatNumber';
+import AvailabiltyColor from './AvailabiltyColor';
 
 const DisplayHouses: React.FC<DisplayHouseProps> = ({ item }) => {
     return (
-        <div className='border border-secondary flex flex-col md:flex-row p-4 m-4 gap-4'>
-            <div className='border border-primary md:w-1/2 overflow-hidden'>
+        <div className='flex flex-col rounded-xl overflow-hidden shadow-2xl relative'>
+            <Link
+                href={`details/${item.Identifier}`}
+                className='overflow-hidden'
+            >
                 {item.ItemOffered?.Photo &&
                 item.ItemOffered.Photo.length > 0 ? (
                     <Image
@@ -22,17 +27,36 @@ const DisplayHouses: React.FC<DisplayHouseProps> = ({ item }) => {
                 ) : (
                     <p className=''>No image available</p>
                 )}
-            </div>
-            <div className='border border-primary w-1/2'>
-                <p className=''>${item.Price}</p>
-                <p className=''>{item.ItemOffered?.Name}</p>
-                <p className=''>{item.ItemOffered?.Address?.Name}</p>
-                <Link
-                    href={`details/${item.Identifier}`}
-                    className='rounded-full border border-primary px-6 py-2 hover:bg-primary hover:border-none'
-                >
-                    details
-                </Link>
+            </Link>
+            <p className='absolute top-0 bottom-0 z-50 ml-2 mt-2 text-secondary font-extralight bg-opacity-40 rounded bg-content text-xs h-fit px-2 py-1'>{`brokered by ${item.OfferedBy?.WorksFor?.Name}`}</p>
+            <div className='m-4 flex'>
+                <div className='w-[60%]'>
+                    <p className='text-2xl font-bold'>
+                        {formatNumber(Number(item.Price), {
+                            currency: item.PriceCurrency,
+                        })}
+                    </p>
+                    {/* <p className=''>{item.ItemOffered?.Name}</p> */}
+                    <p className='font-semibold'>
+                        {item.ItemOffered?.Name?.replace(/,/g, ' ').replace(
+                            /null/g,
+                            'sqft'
+                        )}{' '}
+                    </p>
+                    <p className='text-sm'>
+                        {item.ItemOffered?.Address?.StreetAddress}
+                    </p>
+                    <p className='text-sm'>{`${item.ItemOffered?.Address?.AddressLocality}, ${item.ItemOffered?.Address?.AddressRegion}`}</p>
+                </div>
+                <div className='flex items-end justify-between w-[40%] flex-col'>
+                    <AvailabiltyColor status={item.Availability} />
+                    <Link
+                        href={`details/${item.Identifier}`}
+                        className='rounded-full font-semibold border border-primary hover:text-white px-4 py-2 hover:bg-primary hover:border-none transition duration-200'
+                    >
+                        more details
+                    </Link>
+                </div>
             </div>
         </div>
     );
