@@ -6,13 +6,16 @@ import React, { useEffect, useState } from 'react';
 import Button from './Button';
 import { listingProps } from '@/types';
 import DisplayHouses from './DisplayHouses';
+import SearchForm from './SearchForm';
 
 const RealtySearch: React.FC = () => {
     const [city, setCity] = useState<string | undefined>();
     const [sort, setSort] = useState<string>('RELEVANCE');
     const [priceMax, setPriceMax] = useState<string | undefined>();
     const [listing, setListing] = useState<listingProps[]>([]);
-    // const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [displayListing, setDisplayListing] = useState<listingProps[]>([]);
+    const [itemsToShow, setItemsToShow] = useState<number>(30);
+    const [showMore, setShowMore] = useState<boolean>(false);
 
     useEffect(() => {
         const loadListing = async () => {
@@ -25,14 +28,21 @@ const RealtySearch: React.FC = () => {
                     }
                 }
                 const shuffledListings = shuffleArray(allListings);
-                setListing(shuffledListings.slice(0, 10));
-                console.log(shuffledListings.slice(0, 10));
+                setListing(shuffledListings);
+                setDisplayListing(shuffledListings.slice(0, 30));
             } catch (error) {
                 console.error('failed to fetch data', error);
             }
         };
         loadListing();
     }, []);
+
+    const handleShowMore = () => {
+        setDisplayListing(listing.slice(0, displayListing.length + 30));
+        if (displayListing.length + 30 >= listing.length) {
+            setShowMore(false);
+        }
+    };
 
     const handleSearch = async (ev: React.FormEvent) => {
         ev.preventDefault();
@@ -43,13 +53,14 @@ const RealtySearch: React.FC = () => {
             sort,
             limit: '50',
         });
-        // console.log(result);
-        setListing(result.slice(0, 10));
+        setListing(result);
+        setDisplayListing(result.slice(0, 20));
+        setShowMore(result.length > 20);
     };
 
     const seenIdentifiers = new Set<string>();
 
-    const filteredListing = listing.filter((item) => {
+    const filteredListing = displayListing.filter((item) => {
         if (item.Identifier && !seenIdentifiers.has(item.Identifier)) {
             seenIdentifiers.add(item.Identifier);
             return true;
@@ -57,71 +68,31 @@ const RealtySearch: React.FC = () => {
         return false;
     });
 
-    // if (isLoading) {
-    //     return <div className='text-2xl font-bold'>Loading Listing...</div>;
-    // }
-
     return (
         <section className='mt-12'>
-            <form
-                onSubmit={handleSearch}
-                className='gap-y-4 gap-x-2 px-8 shadow-2xl shadow-primary flex flex-wrap items-center justify-evenly w-4/5 md:w-3/5 mx-auto py-8 rounded'
-            >
-                <div className='w-full md:w-[30%]'>
-                    <label>City:</label> <br />
-                    <select
-                        className='w-full p-2 rounded'
-                        value={city || ''}
-                        onChange={(e) => setCity(e.target.value || undefined)}
-                    >
-                        <option value=''>All Cities</option>
-                        {cities.map((city) => (
-                            <option key={city} value={city}>
-                                {city}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className='w-full md:w-[30%]'>
-                    <label>Sort By:</label> <br />
-                    <select
-                        className='w-full p-2 rounded'
-                        value={sort}
-                        onChange={(e) => setSort(e.target.value)}
-                    >
-                        {sortOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className='w-full md:w-[30%]'>
-                    <label>Max Price (USD):</label> <br />
-                    <input
-                        type='number'
-                        value={priceMax || ''}
-                        onChange={(e) =>
-                            setPriceMax(e.target.value || undefined)
-                        }
-                        className='w-full p-2 rounded'
-                        placeholder='250,000'
-                    />
-                </div>
-
-                <Button
-                    title='search'
-                    style='bg-primary hover:bg-secondary rounded text-white px-20 py-2'
-                    type='submit'
-                />
-            </form>
+            <SearchForm
+                handleSearch={handleSearch}
+                city={city}
+                setCity={setCity}
+                sort={sort}
+                setSort={setSort}
+                priceMax={priceMax}
+                setPriceMax={setPriceMax}
+            />
             <div className='my-12 grid md:grid-cols-2 lg:grid-cols-3 gap-4 gap-y-8 md:gap-y-4 mx-8'>
                 {filteredListing.map((item) => (
                     <DisplayHouses key={item.Identifier} item={item} />
                 ))}
             </div>
+            {showMore && (
+                <div className='border border-red-600 text-center'>
+                    <Button
+                        title='Load More'
+                        style='bg-primary hover:bg-secondary rounded text-white px-20 py-2'
+                        onClick={handleShowMore}
+                    />
+                </div>
+            )}
         </section>
     );
 };

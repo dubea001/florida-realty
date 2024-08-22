@@ -28,7 +28,7 @@ const DisplayHouses: React.FC<DisplayHouseProps> = ({ item }) => {
                     <p className=''>No image available</p>
                 )}
             </Link>
-            <p className='absolute top-0 bottom-0 z-50 ml-2 mt-2 text-secondary font-extralight bg-opacity-40 rounded bg-content text-xs h-fit px-2 py-1'>{`brokered by ${item.OfferedBy?.WorksFor?.Name}`}</p>
+            <p className='absolute top-0 bottom-0 z-50 ml-2 mt-2 text-secondary font-extralight bg-opacity-60 rounded bg-content text-xs h-fit px-2 py-1'>{`brokered by ${item.OfferedBy?.WorksFor?.Name}`}</p>
             <div className='m-4 flex'>
                 <div className='w-[60%]'>
                     <p className='text-2xl font-bold'>

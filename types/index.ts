@@ -1,3 +1,5 @@
+import React from "react";
+
 export interface fetchRealtyOptions {
     city?: string;
     price_max?: string;
@@ -10,6 +12,16 @@ export interface ButtonProps {
     style?: string;
     type?: string;
     onClick?: () => void;
+}
+
+export interface SearchFormProps {
+    handleSearch: (ev: React.FormEvent) => void;
+    city: string | undefined;
+    setCity: (city: string | undefined) => void;
+    sort: string
+    setSort: (sort: string) => void;
+    priceMax: string | undefined;
+    setPriceMax: (Price: string | undefined) => void;
 }
 
 export interface DisplayHouseProps {
