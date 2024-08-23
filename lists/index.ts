@@ -37,8 +37,8 @@ export const getAvailabiltyColor = (status: AvailabilityStatusProps): {color: st
         case "LimitedAvailability":
             return {color: 'bg-yellow-600', text: 'Pending'}         
         case "InStock": 
-            return {color: 'bg-green-700', text: 'For Sale'}
+            return {color: 'bg-green-600', text: 'For Sale'}
         default:
-            return {color: 'bg-gray-700', text: 'Not available'}
+            return {color: 'bg-gray-600', text: 'Not available'}
     }
 }

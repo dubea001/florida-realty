@@ -1,12 +1,13 @@
 'use client';
 
-import { cities, shuffleArray, sortOptions } from '@/lists';
+import { cities, shuffleArray } from '@/lists';
 import { fetchRealtyListings } from '@/utils/api';
 import React, { useEffect, useState } from 'react';
 import Button from './Button';
 import { listingProps } from '@/types';
 import DisplayHouses from './DisplayHouses';
 import SearchForm from './SearchForm';
+import Loader from './Loader';
 
 const RealtySearch: React.FC = () => {
     const [city, setCity] = useState<string | undefined>();
@@ -16,9 +17,13 @@ const RealtySearch: React.FC = () => {
     const [displayListing, setDisplayListing] = useState<listingProps[]>([]);
     const [itemsToShow, setItemsToShow] = useState<number>(30);
     const [showMore, setShowMore] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const loadListing = async () => {
+            setLoading(true);
+            setError(null);
             try {
                 const allListings: listingProps[] = new Array();
                 for (const city of cities) {
@@ -30,8 +35,12 @@ const RealtySearch: React.FC = () => {
                 const shuffledListings = shuffleArray(allListings);
                 setListing(shuffledListings);
                 setDisplayListing(shuffledListings.slice(0, 30));
+                setShowMore(shuffledListings.length > 30);
             } catch (error) {
+                setError('failed to fetch data, please try again later.');
                 console.error('failed to fetch data', error);
+            } finally {
+                setLoading(false);
             }
         };
         loadListing();
@@ -46,16 +55,25 @@ const RealtySearch: React.FC = () => {
 
     const handleSearch = async (ev: React.FormEvent) => {
         ev.preventDefault();
+        setLoading(true);
+        setError(null);
 
-        const result = await fetchRealtyListings({
-            city,
-            price_max: priceMax,
-            sort,
-            limit: '50',
-        });
-        setListing(result);
-        setDisplayListing(result.slice(0, 20));
-        setShowMore(result.length > 20);
+        try {
+            const result = await fetchRealtyListings({
+                city,
+                price_max: priceMax,
+                sort,
+                limit: '50',
+            });
+            setListing(result);
+            setDisplayListing(result.slice(0, 30));
+            setShowMore(result.length > 30);
+        } catch (error) {
+            setError('failed to fetch data, please try again later.');
+            console.error('failed to fetch data', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const seenIdentifiers = new Set<string>();
@@ -69,7 +87,7 @@ const RealtySearch: React.FC = () => {
     });
 
     return (
-        <section className='mt-12'>
+        <section className='my-8'>
             <SearchForm
                 handleSearch={handleSearch}
                 city={city}
@@ -79,16 +97,18 @@ const RealtySearch: React.FC = () => {
                 priceMax={priceMax}
                 setPriceMax={setPriceMax}
             />
+            {loading && <Loader />}
+            {error && <div className=''>{error}</div>}
             <div className='my-12 grid md:grid-cols-2 lg:grid-cols-3 gap-4 gap-y-8 md:gap-y-4 mx-8'>
                 {filteredListing.map((item) => (
                     <DisplayHouses key={item.Identifier} item={item} />
                 ))}
             </div>
-            {showMore && (
-                <div className='border border-red-600 text-center'>
+            {showMore && !loading && (
+                <div className='text-center'>
                     <Button
                         title='Load More'
-                        style='bg-primary hover:bg-secondary rounded text-white px-20 py-2'
+                        style='text-primary border border-primary hover:border-none hover:text-white hover:bg-primary rounded px-12 md:px-20 py-2'
                         onClick={handleShowMore}
                     />
                 </div>
