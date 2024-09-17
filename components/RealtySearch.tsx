@@ -1,15 +1,17 @@
 'use client';
-
 import { cities, shuffleArray } from '@/lists';
 import { fetchRealtyListings } from '@/utils/api';
 import React, { useEffect, useState } from 'react';
 import Button from './Button';
 import { listingProps } from '@/types';
-import DisplayHouses from './DisplayHouses';
 import SearchForm from './SearchForm';
 import Loader from './Loader';
+import { useRouter, useSearchParams } from 'next/navigation';
+import RealtySearchServer from './RealtySearchServer';
 
 const RealtySearch: React.FC = () => {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const [city, setCity] = useState<string | undefined>();
     const [sort, setSort] = useState<string>('RELEVANCE');
     const [priceMax, setPriceMax] = useState<string | undefined>();
@@ -20,32 +22,6 @@ const RealtySearch: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const loadListing = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const allListings: listingProps[] = new Array();
-                for (const city of cities) {
-                    const response = await fetchRealtyListings({ city });
-                    if (response) {
-                        allListings.push(...response);
-                    }
-                }
-                const shuffledListings = shuffleArray(allListings);
-                setListing(shuffledListings);
-                setDisplayListing(shuffledListings.slice(0, 30));
-                setShowMore(shuffledListings.length > 30);
-            } catch (error) {
-                setError('failed to fetch data, please try again later.');
-                console.error('failed to fetch data', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadListing();
-    }, []);
-
     const handleShowMore = () => {
         setDisplayListing(listing.slice(0, displayListing.length + 30));
         if (displayListing.length + 30 >= listing.length) {
@@ -55,55 +31,30 @@ const RealtySearch: React.FC = () => {
 
     const handleSearch = async (ev: React.FormEvent) => {
         ev.preventDefault();
+        const newSearchParams = new URLSearchParams();
+        if (city) newSearchParams.set('city', city);
+        if (sort) newSearchParams.set('sort', sort);
+        if (priceMax) newSearchParams.set('priceMax', priceMax);
+        router.push(`/?${newSearchParams.toString()}`);
         setLoading(true);
         setError(null);
-
-        try {
-            const result = await fetchRealtyListings({
-                city,
-                price_max: priceMax,
-                sort,
-                limit: '50',
-            });
-            setListing(result);
-            setDisplayListing(result.slice(0, 30));
-            setShowMore(result.length > 30);
-        } catch (error) {
-            setError('failed to fetch data, please try again later.');
-            console.error('failed to fetch data', error);
-        } finally {
-            setLoading(false);
-        }
     };
 
-    const seenIdentifiers = new Set<string>();
-
-    const filteredListing = displayListing.filter((item) => {
-        if (item.Identifier && !seenIdentifiers.has(item.Identifier)) {
-            seenIdentifiers.add(item.Identifier);
-            return true;
-        }
-        return false;
-    });
+    useEffect(() => {
+        setLoading(false);
+    }, [searchParams]);
 
     return (
         <section className='my-8'>
-            <SearchForm
-                handleSearch={handleSearch}
-                city={city}
-                setCity={setCity}
-                sort={sort}
-                setSort={setSort}
-                priceMax={priceMax}
-                setPriceMax={setPriceMax}
-            />
             {loading && <Loader />}
             {error && <div className=''>{error}</div>}
-            <div className='my-12 grid md:grid-cols-2 lg:grid-cols-3 gap-4 gap-y-8 md:gap-y-4 mx-8'>
-                {filteredListing.map((item) => (
-                    <DisplayHouses key={item.Identifier} item={item} />
-                ))}
-            </div>
+            <RealtySearchServer
+                searchParams={{
+                    city: searchParams.get('city') || undefined,
+                    sort: searchParams.get('sort') || undefined,
+                    priceMax: searchParams.get('priceMax') || undefined,
+                }}
+            />
             {showMore && !loading && (
                 <div className='text-center'>
                     <Button
